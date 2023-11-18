@@ -19,7 +19,7 @@ namespace ECS
 
 			if (link.OnAdd == null)
 			{
-				link.OnAdd = _archetypesStorage.GetOrCreateArchetypeFor(archetype.Components.CloneAdd(component), archetype.Tags);
+				link.OnAdd = _archetypesStorage.GetOrCreateArchetypeFor(archetype.Components.CloneAdd(component), archetype.Things);
 			}
 
 			return link.OnAdd;
@@ -31,31 +31,31 @@ namespace ECS
 
 			if (link.OnRemove == null)
 			{
-				link.OnRemove = _archetypesStorage.GetOrCreateArchetypeFor(archetype.Components.CloneRemove(component), archetype.Tags);
+				link.OnRemove = _archetypesStorage.GetOrCreateArchetypeFor(archetype.Components.CloneRemove(component), archetype.Things);
 			}
 
 			return link.OnRemove;
 		}
 
-		public Archetype ArchetypeAfterAddTag(Archetype archetype, EcsId tag)
+		public Archetype ArchetypeAfterAddTag(Archetype archetype, EcsId thing)
 		{
-			var link = GetOrCreateLink(archetype, tag);
+			var link = GetOrCreateLink(archetype, thing);
 
 			if (link.OnAdd == null)
 			{
-				link.OnAdd = _archetypesStorage.GetOrCreateArchetypeFor(archetype.Components, archetype.Tags.CloneAdd(tag));
+				link.OnAdd = _archetypesStorage.GetOrCreateArchetypeFor(archetype.Components, archetype.Things.CloneAdd(thing));
 			}
 
 			return link.OnAdd;
 		}
 
-		public Archetype ArchetypeAfterRemoveTag(Archetype archetype, EcsId tag)
+		public Archetype ArchetypeAfterRemoveThing(Archetype archetype, EcsId thing)
 		{
-			var link = GetOrCreateLink(archetype, tag);
+			var link = GetOrCreateLink(archetype, thing);
 
 			if (link.OnRemove == null)
 			{
-				link.OnRemove = _archetypesStorage.GetOrCreateArchetypeFor(archetype.Components, archetype.Tags.CloneRemove(tag));
+				link.OnRemove = _archetypesStorage.GetOrCreateArchetypeFor(archetype.Components, archetype.Things.CloneRemove(thing));
 			}
 
 			return link.OnRemove;

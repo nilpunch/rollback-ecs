@@ -1,13 +1,17 @@
-﻿namespace ECS
+﻿using System.Collections.Generic;
+
+namespace ECS
 {
 	public static class TableUtils
 	{
-		public static void CopyRow(Table source, int sourceRow, Table destination, int destinationRow)
+		public static void CopyRow(Table source, int sourceRow, Table destination, int destinationRow,
+			IEnumerable<EcsId> componentsToCopy, ComponentsStorage componentsStorage)
 		{
-			for (var i = 0; i < source.Columns.Length; i++)
+			foreach (var componentId in componentsToCopy)
 			{
-				var sourceColumn = source.Columns[i];
-				var destinationColumn = destination.Columns[i];
+				var sourceColumn = source.Columns[componentsStorage.GetColumnInTable(componentId, source.TableId)];
+				var destinationColumn = destination.Columns[componentsStorage.GetColumnInTable(componentId, destination.TableId)];
+				
 				DataContainerUtils.CopyElement(sourceColumn.Rows, sourceRow, destinationColumn.Rows, destinationRow);
 			}
 		}

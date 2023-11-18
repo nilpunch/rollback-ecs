@@ -13,14 +13,14 @@ namespace ECS
 			_archetypes = new Dictionary<ArchetypeId, Archetype>();
 		}
 		
-		public Archetype GetOrCreateArchetypeFor(SortedSet<EcsId> components, SortedSet<EcsId> tags)
+		public Archetype GetOrCreateArchetypeFor(SortedSet<EcsId> components, SortedSet<EcsId> things)
 		{
-			ArchetypeId archetypeId = EcsIdUtils.CalculateArchetypeId(components, tags);
+			ArchetypeId archetypeId = EcsIdUtils.CalculateArchetypeId(components, things);
 			
 			if (!_archetypes.TryGetValue(archetypeId, out var archetype))
 			{
 				Table table = components.Count == 0 ? null : _tablesStorage.GetOrCreateTableFor(components);
-				archetype = new Archetype(components, tags, table);
+				archetype = new Archetype(components, things, table);
 				_archetypes.Add(archetypeId, archetype);
 			}
 			

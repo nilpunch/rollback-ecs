@@ -7,7 +7,8 @@ namespace ECS
 	{
 		public HashSet<EcsId> Entities { get; }
 		public SortedSet<EcsId> Components { get; }
-		public SortedSet<EcsId> Tags { get; }
+		public SortedSet<EcsId> Things { get; }
+		public SortedSet<EcsId> FullType { get; }
 		public ArchetypeId ArchetypeId { get; }
 		public TableId TableId { get; }
 
@@ -16,14 +17,15 @@ namespace ECS
 		/// </summary>
 		[CanBeNull] public Table Table { get; }
 
-		public Archetype(SortedSet<EcsId> components, SortedSet<EcsId> tags, [CanBeNull] Table table)
+		public Archetype(SortedSet<EcsId> components, SortedSet<EcsId> things, [CanBeNull] Table table)
 		{
 			Components = components;
-			Tags = tags;
+			Things = things;
 			Table = table;
 			Entities = new HashSet<EcsId>();
-			ArchetypeId = EcsIdUtils.CalculateArchetypeId(components, tags);
+			ArchetypeId = EcsIdUtils.CalculateArchetypeId(components, things);
 			TableId = EcsIdUtils.CalculateTableId(components);
+			FullType = components.CloneAdd(things);
 		}
 	}
 }

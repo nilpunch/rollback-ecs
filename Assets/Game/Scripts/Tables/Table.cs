@@ -6,12 +6,14 @@ namespace ECS
 	{
 		private readonly TableIndices _indices;
 		private readonly IDataContainer _dataContainer;
-		
+
+		public readonly TableId TableId;
 		public readonly Column[] Columns;
 
-		public Table(Column[] columns)
+		public Table(TableId tableId, Column[] columns)
 		{
 			Columns = columns;
+			TableId = tableId;
 			_indices = new TableIndices();
 			
 			// Assuming that each column is the same type of data container with same amount of elements

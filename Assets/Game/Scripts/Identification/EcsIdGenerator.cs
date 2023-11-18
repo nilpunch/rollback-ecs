@@ -18,6 +18,13 @@ namespace ECS
 			_nextFreeId = new EcsId(freeId.Id + 1);
 			return freeId;
 		}
+		
+		public EcsId ReserveNotRecycledId()
+		{
+			EcsId freeId = _nextFreeId;
+			_nextFreeId = new EcsId(freeId.Id + 1);
+			return freeId;
+		}
 
 		public void FreeEntityId(EcsId ecsId)
 		{

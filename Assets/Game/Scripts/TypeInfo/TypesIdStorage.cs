@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace ECS
@@ -17,23 +18,25 @@ namespace ECS
 			_typeInfoById = new Dictionary<EcsId, EcsTypeInfo>();
 		}
 
-		public void Register<T>() where T : unmanaged
+		public EcsTypeInfo EnsureRegistered<T>() where T : unmanaged
 		{
-			var typeInfo = new EcsTypeInfo(_ecsIdGenerator.ReserveId(), Marshal.SizeOf<T>());
-			_typeInfoByType.Add(typeof(T), typeInfo);
-			_typeInfoById.Add(typeInfo.Id, typeInfo);
+			var type = typeof(T);
+
+			if (!_typeInfoByType.TryGetValue(type, out var typeInfo))
+			{
+				typeInfo = new EcsTypeInfo(_ecsIdGenerator.ReserveNotRecycledId(), Marshal.SizeOf(type), HasAnyFields(type));
+				_typeInfoByType.Add(type, typeInfo);
+				_typeInfoById.Add(typeInfo.Id, typeInfo);
+			}
+
+			return typeInfo;
 		}
 
 		public EcsTypeInfo GetTypeInfo(EcsId id)
 		{
 			return _typeInfoById[id];
 		}
-		
-		public EcsTypeInfo GetTypeInfo<T>() where T : unmanaged
-		{
-			return _typeInfoByType[typeof(T)];
-		}
-		
+
 		public EcsId GetId<T>() where T : unmanaged
 		{
 			return _typeInfoByType[typeof(T)].Id;
@@ -42,6 +45,11 @@ namespace ECS
 		public int GetSizeOf<T>() where T : unmanaged
 		{
 			return _typeInfoByType[typeof(T)].SizeOfElement;
+		}
+
+		private bool HasAnyFields(Type type)
+		{
+			return type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Length > 0;
 		}
 	}
 }

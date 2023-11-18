@@ -29,7 +29,7 @@ namespace ECS
 					return new Column(ResizableDataContainer.Create(16, componentInfo.SizeOfElement));
 				}).ToArray();
 			
-				table = new Table(columns);
+				table = new Table(tableId, columns);
 				_tables.Add(tableId, table);
 			}
 

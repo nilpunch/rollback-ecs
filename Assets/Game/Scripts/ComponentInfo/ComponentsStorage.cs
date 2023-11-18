@@ -23,6 +23,11 @@ namespace ECS
 			return GetOrCreateInfo<T>().ColumnInTables[tableId];
 		}
 		
+		public int GetColumnInTable(EcsId ecsId, TableId tableId)
+		{
+			return GetOrCreateInfo(ecsId).ColumnInTables[tableId];
+		}
+		
 		public bool HasColumnInTable<T>(TableId tableId) where T : unmanaged
 		{
 			return GetOrCreateInfo<T>().ColumnInTables.ContainsKey(tableId);
@@ -30,7 +35,7 @@ namespace ECS
 
 		public ComponentInfo GetOrCreateInfo<T>() where T : unmanaged
 		{
-			var typeInfo = _typesIdStorage.GetTypeInfo<T>();
+			var typeInfo = _typesIdStorage.EnsureRegistered<T>();
 
 			if (!_componentInfos.TryGetValue(typeInfo.Id, out var info))
 			{
