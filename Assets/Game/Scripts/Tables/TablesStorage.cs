@@ -18,26 +18,25 @@ namespace ECS
 		{
 			TableId tableId = EcsIdUtils.CalculateTableId(components);
 			
-			if (_tables.TryGetValue(tableId, out var tableData))
+			if (!_tables.TryGetValue(tableId, out var table))
 			{
-				return tableData;
+				Column[] columns = components.Select((componentId, columnIndex) =>
+				{
+					ComponentInfo componentInfo = _componentsStorage.GetOrCreateInfo(componentId);
+					componentInfo.ColumnInTables.Add(tableId, columnIndex);
+					
+					// TODO: put container creation into factory
+					return new Column(ResizableDataContainer.Create(16, componentInfo.SizeOfElement));
+				}).ToArray();
+			
+				table = new Table(columns);
+				_tables.Add(tableId, table);
 			}
 
-			Column[] columns = components.Select((componentId, columnIndex) =>
-			{
-				ComponentInfo componentInfo = _componentsStorage.GetOrCreateInfo(componentId);
-				componentInfo.ColumnInTable.Add(tableId, columnIndex);
-				// TODO: put container creation into factory
-				return new Column(ResizableDataContainer.Create(10, componentInfo.SizeOfElement));
-			}).ToArray();
-			
-			tableData = new Table(columns);
-			_tables.Add(tableId, tableData);
-			
-			return GetTableFor(tableId);
+			return table;
 		}
 		
-		public Table GetTableFor(TableId tableId)
+		public Table GetTable(TableId tableId)
 		{
 			return _tables[tableId];
 		}

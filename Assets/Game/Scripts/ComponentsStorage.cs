@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 namespace ECS
 {
@@ -21,12 +20,12 @@ namespace ECS
 		
 		public int GetColumnInTable<T>(TableId tableId) where T : unmanaged
 		{
-			return GetOrCreateInfo<T>().ColumnInTable[tableId];
+			return GetOrCreateInfo<T>().ColumnInTables[tableId];
 		}
 		
 		public bool HasColumnInTable<T>(TableId tableId) where T : unmanaged
 		{
-			return GetOrCreateInfo<T>().ColumnInTable.ContainsKey(tableId);
+			return GetOrCreateInfo<T>().ColumnInTables.ContainsKey(tableId);
 		}
 
 		public ComponentInfo GetOrCreateInfo<T>() where T : unmanaged

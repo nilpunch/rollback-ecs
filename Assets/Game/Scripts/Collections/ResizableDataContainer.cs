@@ -15,11 +15,11 @@ namespace ECS
 		
 		public bool IsResizeable => true;
 
-		public int Capacity { get; set; }
+		public int Capacity { get; private set; }
 
 		public int SizeOfElement { get; }
 
-		public IntPtr Pointer { get; set; }
+		public IntPtr Pointer { get; private set; }
 
 		private GCHandle Handle { get; set; }
 

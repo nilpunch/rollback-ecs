@@ -6,7 +6,7 @@ namespace ECS
 	{
 		private readonly Stack<int> _freeRows = new Stack<int>();
 		private int _nextFreeRow;
-
+		
 		public int ReserveRow()
 		{
 			if (_freeRows.Count != 0)
@@ -19,9 +19,9 @@ namespace ECS
 			return freeId;
 		}
 
-		public void FreeRow(int rawIndex)
+		public void FreeRow(int rowIndex)
 		{
-			_freeRows.Push(rawIndex);
+			_freeRows.Push(rowIndex);
 		}
 	}
 }

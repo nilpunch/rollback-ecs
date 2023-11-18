@@ -11,8 +11,5 @@ namespace ECS
 		IntPtr Pointer { get; }
 
 		void Resize(int newCapacity);
-		
-		Span<T> AsSpan<T>() where T : unmanaged;
-		ref T GetRef<T>(int index) where T : unmanaged;
 	}
 }

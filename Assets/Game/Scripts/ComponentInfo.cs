@@ -4,13 +4,13 @@ namespace ECS
 {
 	public class ComponentInfo
 	{
-		public readonly Dictionary<TableId, int> ColumnInTable;
+		public readonly Dictionary<TableId, int> ColumnInTables;
 		public readonly int SizeOfElement;
 
 		public ComponentInfo(int sizeOfElement)
 		{
 			SizeOfElement = sizeOfElement;
-			ColumnInTable = new Dictionary<TableId, int>();
+			ColumnInTables = new Dictionary<TableId, int>();
 		}
 	}
 }
