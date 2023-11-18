@@ -19,7 +19,8 @@ namespace ECS
 			
 			if (!_archetypes.TryGetValue(archetypeId, out var archetype))
 			{
-				archetype = new Archetype(components, tags, _tablesStorage.GetOrCreateTableFor(components));
+				Table table = components.Count == 0 ? null : _tablesStorage.GetOrCreateTableFor(components);
+				archetype = new Archetype(components, tags, table);
 				_archetypes.Add(archetypeId, archetype);
 			}
 			

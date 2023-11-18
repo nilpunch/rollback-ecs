@@ -98,6 +98,7 @@ namespace ECS
 			{
 				TableUtils.CopyRow(currentArchetype.Table, currentEntityRow,
 					destinationArchetype.Table, destinationEntityRow);
+				currentArchetype.Table.FreeRow(currentEntityRow);
 			}
 			
 			destinationArchetype.Table
