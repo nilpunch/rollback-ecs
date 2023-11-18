@@ -2,7 +2,7 @@
 
 namespace ECS
 {
-	public class TableRows
+	public class TableIndices
 	{
 		private readonly Stack<int> _freeRows = new Stack<int>();
 		private int _nextFreeRow;

@@ -8,7 +8,8 @@ namespace ECS
 		public HashSet<EcsId> Entities { get; }
 		public SortedSet<EcsId> Components { get; }
 		public SortedSet<EcsId> Tags { get; }
-		public TypeId Id { get; }
+		public ArchetypeId ArchetypeId { get; }
+		public TableId TableId { get; }
 
 		/// <summary>
 		/// Field is null in archetypes with no components.
@@ -21,7 +22,8 @@ namespace ECS
 			Tags = tags;
 			Table = table;
 			Entities = new HashSet<EcsId>();
-			Id = EcsIdUtils.CalculateArchetype(components, tags);
+			ArchetypeId = EcsIdUtils.CalculateArchetypeId(components, tags);
+			TableId = EcsIdUtils.CalculateTableId(components);
 		}
 	}
 }

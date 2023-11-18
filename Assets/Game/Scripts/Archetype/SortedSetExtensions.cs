@@ -17,5 +17,12 @@ namespace ECS
 			set.Remove(element);
 			return set;
 		}
+		
+		public static SortedSet<T> CloneAdd<T>(this SortedSet<T> self, SortedSet<T> other)
+		{
+			var set = new SortedSet<T>(self);
+			set.UnionWith(other);
+			return set;
+		}
 	}
 }

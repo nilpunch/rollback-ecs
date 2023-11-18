@@ -6,19 +6,20 @@ namespace ECS
 {
 	public static class EcsIdUtils
 	{
-		public static TypeId CalculateType(SortedSet<EcsId> components)
+		public static TableId CalculateTableId(SortedSet<EcsId> components)
 		{
-			return new TypeId(components.Select(id => id.Id).Aggregate((current, next) => HashCode.Combine(current, next)));
+			return new TableId(CombineIds(components));
 		}
 		
-		public static TypeId CalculateType(IEnumerable<EcsId> components)
+		public static ArchetypeId CalculateArchetypeId(SortedSet<EcsId> components, SortedSet<EcsId> tags)
 		{
-			return CalculateType(new SortedSet<EcsId>(components));
+			return new ArchetypeId(CombineIds(components.CloneAdd(tags)));
 		}
-		
-		public static TypeId CalculateArchetype(IEnumerable<EcsId> components, IEnumerable<EcsId> tags)
+
+		private static long CombineIds(SortedSet<EcsId> ids)
 		{
-			return CalculateType(components.Concat(tags));
+			return ids.Select(id => id.Id)
+				.Aggregate((current, next) => HashCode.Combine(current, next));
 		}
 	}
 }

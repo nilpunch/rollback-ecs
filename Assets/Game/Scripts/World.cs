@@ -6,25 +6,28 @@ namespace ECS
 {
 	public class World
 	{
+		private readonly ComponentsStorage _componentsStorage;
+		private readonly TypesIdStorage _typesIdStorage;
 		private readonly ArchetypesGraph _archetypesGraph;
 		private readonly ArchetypesStorage _archetypesStorage;
 		private readonly EcsIdGenerator _ecsIdGenerator;
 
 		private readonly Dictionary<EcsId, EntityLocation> _entities;
-		private readonly Dictionary<EcsId, ComponentArchetypes> _components;
 
-		private readonly TypeId _defaultArchetype;
+		private readonly ArchetypeId _defaultArchetype;
 
 		public World()
 		{
 			_ecsIdGenerator = new EcsIdGenerator();
-			_entities = new Dictionary<EcsId, EntityLocation>();
-			_components = new Dictionary<EcsId, ComponentArchetypes>();
-			_archetypesStorage = new ArchetypesStorage(new TablesStorage());
+			_typesIdStorage = new TypesIdStorage(_ecsIdGenerator);
+			_componentsStorage = new ComponentsStorage(_typesIdStorage);
+			
+			_archetypesStorage = new ArchetypesStorage(new TablesStorage(_componentsStorage));
 			_archetypesGraph = new ArchetypesGraph(_archetypesStorage);
 			
+
 			// Create default archetype
-			_defaultArchetype = _archetypesStorage.GetOrCreateArchetypeFor(new SortedSet<EcsId>(), new SortedSet<EcsId>()).Id;
+			_defaultArchetype = _archetypesStorage.GetOrCreateArchetypeFor(new SortedSet<EcsId>(), new SortedSet<EcsId>()).ArchetypeId;
 		}
 		
 		public EcsId CreateEntity()
@@ -42,68 +45,86 @@ namespace ECS
 				return;
 			}
 
-			// Free the row, if table exists
-			entityLocation.Archetype.Table?.Rows.FreeRow(entityLocation.RowInTable);
+			entityLocation.Archetype.Table?.Indices.FreeRow(entityLocation.RowInTable);
 			
 			_entities.Remove(entityId);
 			_ecsIdGenerator.FreeEntityId(entityId);
 		}
         
-		public Component GetComponent(EcsId entityId, EcsId componentId)
+		public ref T GetComponent<T>(EcsId entityId) where T : unmanaged
 		{
 			EntityLocation entityLocation = _entities[entityId];
 			Archetype entityArchetype = entityLocation.Archetype;
-			ComponentArchetypes componentArchetypes = _components[componentId];
-
-			if (componentArchetypes.LocationInArchetype.TryGetValue(entityArchetype.Id, out var componentLocation))
-			{
-				return entityArchetype.Table!.Columns[componentLocation.ColumnInTable].Rows[entityLocation.RowInTable];
-			}
-
-			throw new Exception();
+			int componentColumnInTable = _componentsStorage.GetColumnInTable<T>(entityArchetype.TableId);
+			
+			return ref entityArchetype.Table!
+				.Columns[componentColumnInTable]
+				.Rows.GetRef<T>(entityLocation.RowInTable);
 		}
         
-		public bool HasComponent(EcsId entityId, EcsId componentId)
+		public bool HasComponent<T>(EcsId entityId) where T : unmanaged
 		{
 			EntityLocation entityLocation = _entities[entityId];
-			return _components[componentId].LocationInArchetype.ContainsKey(entityLocation.Archetype.Id);
+			return _componentsStorage.HasColumnInTable<T>(entityLocation.Archetype.TableId);
 		}
 
-		public void AddComponent(EcsId entityId, EcsId componentId, Component component)
+		public void AddComponent<T>(EcsId entityId, T component) where T : unmanaged
 		{
 			EntityLocation entityLocation = _entities[entityId];
-			
+			EcsId componentId = _typesIdStorage.GetId<T>();
 			Archetype currentArchetype = entityLocation.Archetype;
+
+			// If current archetype contains this component, then just copy component value
+			if (currentArchetype.Components.Contains(componentId))
+			{
+				currentArchetype.Table!
+					.Columns[_componentsStorage.GetColumnInTable<T>(currentArchetype.TableId)]
+					.Rows.GetRef<T>(entityLocation.RowInTable) = component;
+				return;
+			}
+			
 			Archetype targetArchetype = _archetypesGraph.ArchetypeAfterAddComponent(currentArchetype, componentId);
 
-			int targetRow = -1;
-			
-			// TODO: Handle case, where targetTable == currentTable
-			if (targetArchetype.Table != null)
+			if (currentArchetype.Table == null)
 			{
-				targetRow = targetArchetype.Table.Rows.ReserveRow();
-				
-				if (currentArchetype.Table != null)
-				{
-					CopyComponentData(currentArchetype.Components,
-						currentArchetype.Table, entityLocation.RowInTable,
-						targetArchetype.Table, targetRow);
-					
-					currentArchetype.Table.Rows.FreeRow(entityLocation.RowInTable);
-				}
+				var targetRow = targetArchetype.Table!.Indices.ReserveRow();
 
 				targetArchetype.Table
-					.Columns[_components[componentId].LocationInArchetype[targetArchetype.Id].ColumnInTable]
-					.Rows[targetRow] = component;
+					.Columns[_componentsStorage.GetColumnInTable<T>(targetArchetype.TableId)]
+					.Rows.GetRef<T>(targetRow) = component;
 			}
-
-			currentArchetype.Entities.Remove(entityId);
-			targetArchetype.Entities.Add(entityId);
-
-			_entities[entityId] = new EntityLocation(targetArchetype, targetRow);
+			else if (currentArchetype.Table == targetArchetype.Table)
+			{
+				
+			}
+			
+			//
+			// if (targetArchetype.Table != null)
+			// {
+			// 	
+			// 	if (currentArchetype.Table != null)
+			// 	{
+			// 		CopyComponentData(currentArchetype.Components,
+			// 			currentArchetype.Table, entityLocation.RowInTable,
+			// 			targetArchetype.Table, targetRow);
+			// 		
+			// 		currentArchetype.Table.Indices.FreeRow(entityLocation.RowInTable);
+			// 	}
+			//
+			// 	targetArchetype.Table
+			// 		.Columns[_components[componentId].ColumnInTable[targetArchetype.TableId]]
+			// 		.Rows.GetRef<T>(targetRow) = component;
+			// }
+			//
+			// currentArchetype.Entities.Remove(entityId);
+			// targetArchetype.Entities.Add(entityId);
+			//
+			// _entities[entityId] = new EntityLocation(targetArchetype, targetRow);
 		}
 
-		private void CopyComponentData(SortedSet<EcsId> components, Table fromTable, int fromRow, Table toTable, int toRow)
+		
+		
+		private void CopyComponentData(SortedSet<EcsId> components, Table source, int sourceRow, Table destination, int destinationRow)
 		{
 			// foreach (var componentToCopy in currentArchetype.Components)
 			// {

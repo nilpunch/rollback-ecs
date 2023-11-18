@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
-
-namespace ECS
+﻿namespace ECS
 {
 	public class Column
 	{
-		public List<Component> Rows;
+		public readonly IDataContainer Rows;
+
+		public Column(IDataContainer rowsContainer)
+		{
+			Rows = rowsContainer;
+		}
 	}
 }

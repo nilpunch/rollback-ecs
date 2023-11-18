@@ -5,28 +5,28 @@ namespace ECS
 	public class ArchetypesStorage
 	{
 		private readonly TablesStorage _tablesStorage;
-		private readonly Dictionary<TypeId, Archetype> _archetypes;
+		private readonly Dictionary<ArchetypeId, Archetype> _archetypes;
 		
 		public ArchetypesStorage(TablesStorage tablesStorage)
 		{
 			_tablesStorage = tablesStorage;
-			_archetypes = new Dictionary<TypeId, Archetype>();
+			_archetypes = new Dictionary<ArchetypeId, Archetype>();
 		}
 		
 		public Archetype GetOrCreateArchetypeFor(SortedSet<EcsId> components, SortedSet<EcsId> tags)
 		{
-			TypeId archetype = EcsIdUtils.CalculateArchetype(components, tags);
+			ArchetypeId archetypeId = EcsIdUtils.CalculateArchetypeId(components, tags);
 			
-			if (!_archetypes.TryGetValue(archetype, out var tableData))
+			if (!_archetypes.TryGetValue(archetypeId, out var archetype))
 			{
-				tableData = new Archetype(components, tags, _tablesStorage.GetOrCreateTableFor(components));
-				_archetypes.Add(archetype, tableData);
+				archetype = new Archetype(components, tags, _tablesStorage.GetOrCreateTableFor(components));
+				_archetypes.Add(archetypeId, archetype);
 			}
 			
-			return tableData;
+			return archetype;
 		}
 
-		public Archetype GetArchetypeFor(TypeId archetypeId)
+		public Archetype GetArchetypeFor(ArchetypeId archetypeId)
 		{
 			return _archetypes[archetypeId];
 		}

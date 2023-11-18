@@ -4,7 +4,14 @@ namespace ECS
 {
 	public class Table
 	{
-		public TableRows Rows = new TableRows();
-		public List<Column> Columns = new List<Column>();
+		public readonly TableIndices Indices = new TableIndices();
+		public readonly Column[] Columns;
+
+		public Table(Column[] columns)
+		{
+			Columns = columns;
+		}
+		
+		
 	}
 }
