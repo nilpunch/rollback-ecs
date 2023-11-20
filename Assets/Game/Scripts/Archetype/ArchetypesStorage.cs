@@ -2,15 +2,18 @@
 
 namespace ECS
 {
+	/// <summary>
+	/// Container for all archetypes.
+	/// </summary>
 	public class ArchetypesStorage
 	{
 		private readonly TablesStorage _tablesStorage;
 		private readonly Dictionary<ArchetypeId, Archetype> _archetypes;
 		
-		public ArchetypesStorage(TablesStorage tablesStorage)
+		public ArchetypesStorage(TablesStorage tablesStorage, Archetype defaultArchetype)
 		{
 			_tablesStorage = tablesStorage;
-			_archetypes = new Dictionary<ArchetypeId, Archetype>();
+			_archetypes = new Dictionary<ArchetypeId, Archetype> { { defaultArchetype.ArchetypeId, defaultArchetype } };
 		}
 		
 		public Archetype GetOrCreateArchetypeFor(SortedSet<EcsId> components, SortedSet<EcsId> things)

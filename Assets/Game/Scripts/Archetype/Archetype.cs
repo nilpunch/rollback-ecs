@@ -8,7 +8,6 @@ namespace ECS
 		public HashSet<EcsId> Entities { get; }
 		public SortedSet<EcsId> Components { get; }
 		public SortedSet<EcsId> Things { get; }
-		public SortedSet<EcsId> FullType { get; }
 		public ArchetypeId ArchetypeId { get; }
 		public TableId TableId { get; }
 
@@ -25,7 +24,6 @@ namespace ECS
 			Entities = new HashSet<EcsId>();
 			ArchetypeId = EcsIdUtils.CalculateArchetypeId(components, things);
 			TableId = EcsIdUtils.CalculateTableId(components);
-			FullType = components.CloneAdd(things);
 		}
 	}
 }

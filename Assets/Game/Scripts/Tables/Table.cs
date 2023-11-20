@@ -5,39 +5,39 @@ namespace ECS
 	public class Table
 	{
 		private readonly TableIndices _indices;
-		private readonly IDataContainer _dataContainer;
+		private readonly IDataContainer _oneOfColumns;
 
 		public readonly TableId TableId;
-		public readonly Column[] Columns;
+		public readonly IDataContainer[] Columns;
 
-		public Table(TableId tableId, Column[] columns)
+		public Table(TableId tableId, IDataContainer[] columns)
 		{
 			Columns = columns;
 			TableId = tableId;
 			_indices = new TableIndices();
 			
 			// Assuming that each column is the same type of data container with same amount of elements
-			_dataContainer = Columns[0].Rows;
+			_oneOfColumns = Columns[0];
 		}
 
 		public int ReserveRow()
 		{
 			int reservedRow = _indices.ReserveRow();
 
-			if (reservedRow < _dataContainer.Capacity)
+			if (reservedRow < _oneOfColumns.Capacity)
 			{
 				return reservedRow;
 			}
 
-			if (!_dataContainer.IsResizeable)
+			if (!_oneOfColumns.IsResizeable)
 			{
-				throw new InvalidOperationException("Table reached it's max capacity.");
+				throw new InvalidOperationException("Table reach it's max capacity.");
 			}
 
-			int newCapacity = _dataContainer.Capacity * 2;
+			int newCapacity = _oneOfColumns.Capacity * 2;
 			foreach (var column in Columns)
 			{
-				column.Rows.Resize(newCapacity);
+				column.Resize(newCapacity);
 			}
 
 			return reservedRow;

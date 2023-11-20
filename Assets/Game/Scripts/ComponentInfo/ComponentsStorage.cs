@@ -2,58 +2,34 @@
 
 namespace ECS
 {
+	/// <summary>
+	/// Container for all components and their matched tables.
+	/// </summary>
 	public class ComponentsStorage
 	{
-		private readonly TypesIdStorage _typesIdStorage;
-		private readonly Dictionary<EcsId, ComponentInfo> _componentInfos;
+		private readonly Dictionary<EcsId, ComponentTables> _componentInfos;
 
-		public ComponentsStorage(TypesIdStorage typesIdStorage)
+		public ComponentsStorage()
 		{
-			_typesIdStorage = typesIdStorage;
-			_componentInfos = new Dictionary<EcsId, ComponentInfo>();
+			_componentInfos = new Dictionary<EcsId, ComponentTables>();
 		}
 
-		public int GetSizeOf<T>() where T : unmanaged
+		public int GetColumnInTable(EcsId componentId, TableId tableId)
 		{
-			return GetOrCreateInfo<T>().SizeOfElement;
+			return GetOrCreateInfo(componentId).ColumnInTables[tableId];
 		}
 		
-		public int GetColumnInTable<T>(TableId tableId) where T : unmanaged
+		public bool HasColumnInTable(EcsId componentId, TableId tableId)
 		{
-			return GetOrCreateInfo<T>().ColumnInTables[tableId];
+			return GetOrCreateInfo(componentId).ColumnInTables.ContainsKey(tableId);
 		}
 		
-		public int GetColumnInTable(EcsId ecsId, TableId tableId)
+		public ComponentTables GetOrCreateInfo(EcsId componentId)
 		{
-			return GetOrCreateInfo(ecsId).ColumnInTables[tableId];
-		}
-		
-		public bool HasColumnInTable<T>(TableId tableId) where T : unmanaged
-		{
-			return GetOrCreateInfo<T>().ColumnInTables.ContainsKey(tableId);
-		}
-
-		public ComponentInfo GetOrCreateInfo<T>() where T : unmanaged
-		{
-			var typeInfo = _typesIdStorage.EnsureRegistered<T>();
-
-			if (!_componentInfos.TryGetValue(typeInfo.Id, out var info))
+			if (!_componentInfos.TryGetValue(componentId, out var info))
 			{
-				info = new ComponentInfo(typeInfo.SizeOfElement);
-				_componentInfos.Add(typeInfo.Id, info);
-			}
-
-			return info;
-		}
-		
-		public ComponentInfo GetOrCreateInfo(EcsId componentId)
-		{
-			var typeInfo = _typesIdStorage.GetTypeInfo(componentId);
-
-			if (!_componentInfos.TryGetValue(typeInfo.Id, out var info))
-			{
-				info = new ComponentInfo(typeInfo.SizeOfElement);
-				_componentInfos.Add(typeInfo.Id, info);
+				info = new ComponentTables();
+				_componentInfos.Add(componentId, info);
 			}
 
 			return info;

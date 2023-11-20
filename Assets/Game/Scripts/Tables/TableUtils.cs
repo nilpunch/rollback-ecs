@@ -12,7 +12,7 @@ namespace ECS
 				var sourceColumn = source.Columns[componentsStorage.GetColumnInTable(componentId, source.TableId)];
 				var destinationColumn = destination.Columns[componentsStorage.GetColumnInTable(componentId, destination.TableId)];
 				
-				DataContainerUtils.CopyElement(sourceColumn.Rows, sourceRow, destinationColumn.Rows, destinationRow);
+				DataContainerUtils.CopyElement(sourceColumn, sourceRow, destinationColumn, destinationRow);
 			}
 		}
 	}

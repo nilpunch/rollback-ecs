@@ -2,9 +2,9 @@
 {
 	public struct EcsTypeInfo
 	{
-		public readonly bool HasFields;
 		public readonly EcsId Id;
 		public readonly int SizeOfElement;
+		public readonly bool HasFields;
 
 		public EcsTypeInfo(EcsId id, int sizeOfElement, bool hasFields)
 		{

@@ -11,6 +11,11 @@ namespace ECS
 			return new TableId(CombineIds(components));
 		}
 		
+		public static TableId CalculateTableId(IEnumerable<EcsId> components)
+		{
+			return new TableId(CombineIds(new SortedSet<EcsId>(components)));
+		}
+		
 		public static ArchetypeId CalculateArchetypeId(SortedSet<EcsId> components, SortedSet<EcsId> tags)
 		{
 			return new ArchetypeId(CombineIds(components.CloneAdd(tags)));

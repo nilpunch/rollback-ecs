@@ -2,6 +2,9 @@
 
 namespace ECS
 {
+	/// <summary>
+	/// Container to find linked archetypes.
+	/// </summary>
 	public class ArchetypesGraph
 	{
 		private readonly ArchetypesStorage _archetypesStorage;

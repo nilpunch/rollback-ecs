@@ -1,32 +1,38 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ECS
 {
+	/// <summary>
+	/// Container for all tables.
+	/// </summary>
 	public class TablesStorage
 	{
+		private readonly TypesStorage _typesStorage;
 		private readonly ComponentsStorage _componentsStorage;
 		private readonly Dictionary<TableId, Table> _tables;
 
-		public TablesStorage(ComponentsStorage componentsStorage)
+		public TablesStorage(TypesStorage typesStorage, ComponentsStorage componentsStorage)
 		{
 			_componentsStorage = componentsStorage;
+			_typesStorage = typesStorage;
 			_tables = new Dictionary<TableId, Table>();
 		}
-		
+
 		public Table GetOrCreateTableFor(SortedSet<EcsId> components)
 		{
 			TableId tableId = EcsIdUtils.CalculateTableId(components);
 			
 			if (!_tables.TryGetValue(tableId, out var table))
 			{
-				Column[] columns = components.Select((componentId, columnIndex) =>
+				var columns = components.Select((componentId, columnIndex) =>
 				{
-					ComponentInfo componentInfo = _componentsStorage.GetOrCreateInfo(componentId);
-					componentInfo.ColumnInTables.Add(tableId, columnIndex);
-					
+					// Link component type to created table
+					_componentsStorage.GetOrCreateInfo(componentId).ColumnInTables.Add(tableId, columnIndex);
+
 					// TODO: put container creation into factory
-					return new Column(ResizableDataContainer.Create(16, componentInfo.SizeOfElement));
+					return ResizableDataContainer.Create(16, _typesStorage.GetTypeInfo(componentId).SizeOfElement);
 				}).ToArray();
 			
 				table = new Table(tableId, columns);
