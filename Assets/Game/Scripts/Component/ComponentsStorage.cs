@@ -18,12 +18,12 @@ namespace ECS
 		{
 			return GetOrCreateInfo(componentId).ColumnInTables[tableId];
 		}
-		
+
 		public bool HasColumnInTable(EcsId componentId, TableId tableId)
 		{
 			return GetOrCreateInfo(componentId).ColumnInTables.ContainsKey(tableId);
 		}
-		
+
 		public ComponentTables GetOrCreateInfo(EcsId componentId)
 		{
 			if (!_componentInfos.TryGetValue(componentId, out var info))

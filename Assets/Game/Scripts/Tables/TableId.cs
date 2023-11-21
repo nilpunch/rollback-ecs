@@ -5,7 +5,7 @@ namespace ECS
 	public readonly struct ArchetypeId : IEquatable<ArchetypeId>
 	{
 		public readonly long Id;
-	
+
 		public ArchetypeId(long id)
 		{
 			Id = id;

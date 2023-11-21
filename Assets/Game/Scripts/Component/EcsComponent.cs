@@ -1,6 +1,6 @@
 ﻿namespace ECS
 {
-    public struct EcsComponent
-    {
-    }
+	public struct EcsComponent
+	{
+	}
 }

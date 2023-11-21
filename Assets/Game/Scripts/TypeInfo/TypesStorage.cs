@@ -34,7 +34,7 @@ namespace ECS
 		{
 			return _typeInfoByType.TryGetValue(typeof(T), out info);
 		}
-		
+
 		public bool IsRegistered<T>() where T : unmanaged
 		{
 			return _typeInfoByType.ContainsKey(typeof(T));
@@ -48,6 +48,17 @@ namespace ECS
 		public EcsTypeInfo GetTypeInfo(EcsId id)
 		{
 			return _typeInfoById[id];
+		}
+
+		public IEnumerable<EcsId> GetOnlyComponentIds(IEnumerable<EcsId> ids)
+		{
+			foreach (var ecsId in ids)
+			{
+				if (_typeInfoById.TryGetValue(ecsId, out var typeInfo) && typeInfo.HasFields)
+				{
+					yield return ecsId;
+				}
+			}
 		}
 
 		private bool HasAnyFields(Type type)

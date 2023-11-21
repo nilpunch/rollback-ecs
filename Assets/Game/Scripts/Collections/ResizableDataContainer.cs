@@ -12,7 +12,7 @@ namespace ECS
 			Capacity = capacity;
 			SizeOfElement = sizeOfElement;
 		}
-		
+
 		public bool IsResizeable => true;
 
 		public int Capacity { get; private set; }
@@ -27,13 +27,13 @@ namespace ECS
 		{
 			return Create(capacity, Marshal.SizeOf<T>());
 		}
-		
+
 		public static IDataContainer Create(int capacity, int sizeOfElement)
 		{
 			var data = new byte[capacity * sizeOfElement];
 			var handle = GCHandle.Alloc(data, GCHandleType.Pinned);
 			var pointer = handle.AddrOfPinnedObject();
-			
+
 			return new ResizableDataContainer(pointer, handle, capacity, sizeOfElement);
 		}
 
@@ -42,11 +42,11 @@ namespace ECS
 			var newData = new byte[newCapacity * SizeOfElement];
 			var newHandle = GCHandle.Alloc(newData, GCHandleType.Pinned);
 			var newPointer = newHandle.AddrOfPinnedObject();
-			
+
 			Buffer.MemoryCopy(Pointer.ToPointer(), newPointer.ToPointer(),
 				Capacity * SizeOfElement,
 				Capacity * SizeOfElement);
-			
+
 			Handle.Free();
 			Handle = newHandle;
 			Pointer = newPointer;

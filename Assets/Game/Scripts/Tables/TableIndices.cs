@@ -6,7 +6,7 @@ namespace ECS
 	{
 		private readonly Stack<int> _freeRows = new Stack<int>();
 		private int _nextFreeRow;
-		
+
 		public int ReserveRow()
 		{
 			if (_freeRows.Count != 0)

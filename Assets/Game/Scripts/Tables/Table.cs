@@ -15,7 +15,7 @@ namespace ECS
 			Columns = columns;
 			TableId = tableId;
 			_indices = new TableIndices();
-			
+
 			// Assuming that each column is the same type of data container with same amount of elements
 			_oneOfColumns = Columns[0];
 		}

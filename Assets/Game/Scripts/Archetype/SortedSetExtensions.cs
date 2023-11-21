@@ -14,10 +14,10 @@ namespace ECS
 		public static SortedSet<T> CloneAdd<T>(this SortedSet<T> self, T element)
 		{
 			var set = new SortedSet<T>(self);
-			set.Remove(element);
+			set.Add(element);
 			return set;
 		}
-		
+
 		public static SortedSet<T> CloneAdd<T>(this SortedSet<T> self, SortedSet<T> other)
 		{
 			var set = new SortedSet<T>(self);

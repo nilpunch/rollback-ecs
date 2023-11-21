@@ -6,24 +6,18 @@ namespace ECS
 	public class Archetype
 	{
 		public HashSet<EcsId> Entities { get; }
-		public SortedSet<EcsId> Components { get; }
-		public SortedSet<EcsId> Things { get; }
-		public ArchetypeId ArchetypeId { get; }
-		public TableId TableId { get; }
+		public SortedSet<EcsId> Type { get; }
 
 		/// <summary>
 		/// Field is null in archetypes with no components.
 		/// </summary>
 		[CanBeNull] public Table Table { get; }
 
-		public Archetype(SortedSet<EcsId> components, SortedSet<EcsId> things, [CanBeNull] Table table)
+		public Archetype(SortedSet<EcsId> type, [CanBeNull] Table table)
 		{
-			Components = components;
-			Things = things;
+			Type = type;
 			Table = table;
 			Entities = new HashSet<EcsId>();
-			ArchetypeId = EcsIdUtils.CalculateArchetypeId(components, things);
-			TableId = EcsIdUtils.CalculateTableId(components);
 		}
 	}
 }

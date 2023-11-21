@@ -16,37 +16,13 @@ namespace ECS
 			_graph = new Dictionary<Archetype, Dictionary<EcsId, ArchetypesLink>>();
 		}
 
-		public Archetype ArchetypeAfterAddComponent(Archetype archetype, EcsId component)
-		{
-			var link = GetOrCreateLink(archetype, component);
-
-			if (link.OnAdd == null)
-			{
-				link.OnAdd = _archetypesStorage.GetOrCreateArchetypeFor(archetype.Components.CloneAdd(component), archetype.Things);
-			}
-
-			return link.OnAdd;
-		}
-
-		public Archetype ArchetypeAfterRemoveComponent(Archetype archetype, EcsId component)
-		{
-			var link = GetOrCreateLink(archetype, component);
-
-			if (link.OnRemove == null)
-			{
-				link.OnRemove = _archetypesStorage.GetOrCreateArchetypeFor(archetype.Components.CloneRemove(component), archetype.Things);
-			}
-
-			return link.OnRemove;
-		}
-
 		public Archetype ArchetypeAfterAddThing(Archetype archetype, EcsId thing)
 		{
 			var link = GetOrCreateLink(archetype, thing);
 
 			if (link.OnAdd == null)
 			{
-				link.OnAdd = _archetypesStorage.GetOrCreateArchetypeFor(archetype.Components, archetype.Things.CloneAdd(thing));
+				link.OnAdd = _archetypesStorage.GetOrCreateArchetypeFor(archetype.Type.CloneAdd(thing));
 			}
 
 			return link.OnAdd;
@@ -58,7 +34,7 @@ namespace ECS
 
 			if (link.OnRemove == null)
 			{
-				link.OnRemove = _archetypesStorage.GetOrCreateArchetypeFor(archetype.Components, archetype.Things.CloneRemove(thing));
+				link.OnRemove = _archetypesStorage.GetOrCreateArchetypeFor(archetype.Type.CloneRemove(thing));
 			}
 
 			return link.OnRemove;

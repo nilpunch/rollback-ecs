@@ -9,24 +9,24 @@ namespace ECS
 	{
 		private readonly TablesStorage _tablesStorage;
 		private readonly Dictionary<ArchetypeId, Archetype> _archetypes;
-		
+
 		public ArchetypesStorage(TablesStorage tablesStorage)
 		{
 			_tablesStorage = tablesStorage;
 			_archetypes = new Dictionary<ArchetypeId, Archetype>();
 		}
-		
-		public Archetype GetOrCreateArchetypeFor(SortedSet<EcsId> components, SortedSet<EcsId> things)
+
+		public Archetype GetOrCreateArchetypeFor(SortedSet<EcsId> type)
 		{
-			ArchetypeId archetypeId = EcsIdUtils.CalculateArchetypeId(components, things);
-			
+			ArchetypeId archetypeId = EcsIdUtils.CalculateArchetypeId(type);
+
 			if (!_archetypes.TryGetValue(archetypeId, out var archetype))
 			{
-				Table table = components.Count == 0 ? null : _tablesStorage.GetOrCreateTableFor(components);
-				archetype = new Archetype(components, things, table);
+				Table table = _tablesStorage.GetOrCreateTableFor(type);
+				archetype = new Archetype(type, table);
 				_archetypes.Add(archetypeId, archetype);
 			}
-			
+
 			return archetype;
 		}
 
