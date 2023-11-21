@@ -40,7 +40,7 @@ namespace ECS
 			return link.OnRemove;
 		}
 
-		public Archetype ArchetypeAfterAddTag(Archetype archetype, EcsId thing)
+		public Archetype ArchetypeAfterAddThing(Archetype archetype, EcsId thing)
 		{
 			var link = GetOrCreateLink(archetype, thing);
 

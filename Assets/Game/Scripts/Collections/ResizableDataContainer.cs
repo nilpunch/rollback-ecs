@@ -53,16 +53,6 @@ namespace ECS
 			Capacity = newCapacity;
 		}
 
-		public unsafe Span<T> AsSpan<T>() where T : unmanaged
-		{
-			return new Span<T>(Pointer.ToPointer(), Capacity);
-		}
-
-		public unsafe ref T GetRef<T>(int index) where T : unmanaged
-		{
-			return ref ((T*)Pointer.ToPointer())[index];
-		}
-
 		~ResizableDataContainer()
 		{
 			Handle.Free();

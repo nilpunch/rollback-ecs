@@ -27,7 +27,7 @@ namespace ECS
 			return new Span<T>(source.Pointer.ToPointer(), source.Capacity);
 		}
 
-		public static unsafe ref T GetRef<T>(this IDataContainer source, int index) where T : unmanaged
+		public static unsafe ref T GetElementRef<T>(this IDataContainer source, int index) where T : unmanaged
 		{
 			return ref ((T*)source.Pointer.ToPointer())[index];
 		}

@@ -6,81 +6,96 @@ namespace ECS
 {
 	public class World
 	{
-		private readonly ComponentsStorage _componentsStorage;
-		private readonly TypesStorage _typesStorage;
-		private readonly ArchetypesGraph _archetypesGraph;
-		private readonly EntitiesStorage _entitiesStorage;
-
 		public World()
 		{
-			Archetype defaultArchetype = new Archetype(new SortedSet<EcsId>(), new SortedSet<EcsId>(), null);
+			EntitiesStorage = new EntitiesStorage();
+			ComponentsStorage = new ComponentsStorage();
+			TypesStorage = new TypesStorage();
 
-			_entitiesStorage = new EntitiesStorage(defaultArchetype);
-			_componentsStorage = new ComponentsStorage();
-			_typesStorage = new TypesStorage(_entitiesStorage);
-
-			_archetypesGraph = new ArchetypesGraph(
-				new ArchetypesStorage(
-					new TablesStorage(_typesStorage, _componentsStorage),
-					defaultArchetype));
+			TablesStorage = new TablesStorage(TypesStorage, ComponentsStorage);
+			ArchetypesStorage = new ArchetypesStorage(TablesStorage);
+			ArchetypesGraph = new ArchetypesGraph(ArchetypesStorage);
+			
+			DefaultArchetype = ArchetypesStorage.GetOrCreateArchetypeFor(new SortedSet<EcsId>(), new SortedSet<EcsId>());
+			
+			EcsComponentId = CreateEntity();
+			TypesStorage.RegisterTypeWithId<EcsComponent>(EcsComponentId);
+			DefaultComponentArchetype = ArchetypesGraph.ArchetypeAfterAddThing(DefaultArchetype, EcsComponentId);
 		}
 
-		public void RegisterType<T>() where T : unmanaged
-		{
-			_typesStorage.EnsureRegistered<T>();
-		}
+		public ComponentsStorage ComponentsStorage { get; }
+		public TypesStorage TypesStorage { get; }
+		public ArchetypesStorage ArchetypesStorage { get; }
+		public TablesStorage TablesStorage { get; }
+		public ArchetypesGraph ArchetypesGraph { get; }
+		public EntitiesStorage EntitiesStorage { get; }
 		
+		public Archetype DefaultArchetype { get; }
+		public Archetype DefaultComponentArchetype { get; }
+		public EcsId EcsComponentId { get; }
+
 		public EcsId CreateEntity()
 		{
-			return _entitiesStorage.Create();
+			return EntitiesStorage.CreateInArchetype(DefaultArchetype);
 		}
 		
 		public void DestroyEntity(EcsId entityId)
 		{
-			_entitiesStorage.Destroy(entityId);
+			EntitiesStorage.Destroy(entityId);
+		}
+
+		public EcsTypeInfo EnsureTypeRegistered<T>() where T : unmanaged
+		{
+			if (!TypesStorage.TryGetTypeInfo<T>(out var typeInfo))
+			{
+				EcsId componentId = EntitiesStorage.CreateInArchetype(DefaultComponentArchetype);
+				typeInfo = TypesStorage.RegisterTypeWithId<T>(componentId);
+			}
+
+			return typeInfo;
 		}
         
 		public ref T GetComponent<T>(EcsId entityId) where T : unmanaged
 		{
-			var typeInfo = _typesStorage.EnsureRegistered<T>();
+			var typeInfo = EnsureTypeRegistered<T>();
 
 			if (!typeInfo.HasFields)
 			{
 				throw new InvalidOperationException("Specified type has no associated data.");
 			}
 			
-			EntityInfo entityInfo = _entitiesStorage[entityId];
+			EntityInfo entityInfo = EntitiesStorage[entityId];
 			Archetype entityArchetype = entityInfo.Archetype;
-			int componentColumnInTable = _componentsStorage.GetColumnInTable(typeInfo.Id, entityArchetype.TableId);
+			int componentColumnInTable = ComponentsStorage.GetColumnInTable(typeInfo.Id, entityArchetype.TableId);
 			
 			return ref entityArchetype.Table!
 				.Columns[componentColumnInTable]
-				.GetRef<T>(entityInfo.RowInTable);
+				.GetElementRef<T>(entityInfo.RowInTable);
 		}
         
 		public bool HasComponent<T>(EcsId entityId) where T : unmanaged
 		{
-			var typeInfo = _typesStorage.EnsureRegistered<T>();
+			var typeInfo = EnsureTypeRegistered<T>();
 			
 			if (!typeInfo.HasFields)
 			{
 				return false;
 			}
 			
-			EntityInfo entityInfo = _entitiesStorage[entityId];
-			return _componentsStorage.HasColumnInTable(typeInfo.Id, entityInfo.Archetype.TableId);
+			EntityInfo entityInfo = EntitiesStorage[entityId];
+			return ComponentsStorage.HasColumnInTable(typeInfo.Id, entityInfo.Archetype.TableId);
 		}
 		
 		public bool Has<T>(EcsId entityId) where T : unmanaged
 		{
-			EcsTypeInfo typeInfo = _typesStorage.EnsureRegistered<T>();
-			EntityInfo entityInfo = _entitiesStorage[entityId];
-			return _componentsStorage.HasColumnInTable(typeInfo.Id, entityInfo.Archetype.TableId);
+			EcsTypeInfo typeInfo = EnsureTypeRegistered<T>();
+			EntityInfo entityInfo = EntitiesStorage[entityId];
+			return ComponentsStorage.HasColumnInTable(typeInfo.Id, entityInfo.Archetype.TableId);
 		}
 
 		public void Remove<T>(EcsId entityId) where T : unmanaged
 		{
-			EcsTypeInfo typeInfo = _typesStorage.EnsureRegistered<T>();
+			EcsTypeInfo typeInfo = EnsureTypeRegistered<T>();
 			
 			if (typeInfo.HasFields)
 			{
@@ -94,7 +109,7 @@ namespace ECS
 
 		public void Set<T>(EcsId entityId, T value = default) where T : unmanaged
 		{
-			EcsTypeInfo typeInfo = _typesStorage.EnsureRegistered<T>();
+			EcsTypeInfo typeInfo = EnsureTypeRegistered<T>();
 			
 			if (typeInfo.HasFields)
 			{
@@ -108,7 +123,7 @@ namespace ECS
 		
 		public void Add<T>(EcsId entityId) where T : unmanaged
 		{
-			EcsTypeInfo typeInfo = _typesStorage.EnsureRegistered<T>();
+			EcsTypeInfo typeInfo = EnsureTypeRegistered<T>();
 			
 			if (typeInfo.HasFields)
 			{
@@ -124,7 +139,7 @@ namespace ECS
 		{
 			EcsId componentId = typeInfo.Id;
 			
-			EntityInfo currentEntityInfo = _entitiesStorage[entityId];
+			EntityInfo currentEntityInfo = EntitiesStorage[entityId];
 			Archetype currentArchetype = currentEntityInfo.Archetype;
 			int currentEntityRow = currentEntityInfo.RowInTable;
 			
@@ -132,27 +147,27 @@ namespace ECS
 			// then just update existed component value
 			if (currentArchetype.Components.Contains(componentId))
 			{
-				int currentComponentColumn = _componentsStorage.GetColumnInTable(componentId, currentArchetype.TableId);
+				int currentComponentColumn = ComponentsStorage.GetColumnInTable(componentId, currentArchetype.TableId);
 				currentArchetype.Table!
 					.Columns[currentComponentColumn]
-					.GetRef<T>(currentEntityRow) = value;
+					.GetElementRef<T>(currentEntityRow) = value;
 				return;
 			}
 			
-			Archetype destinationArchetype = _archetypesGraph.ArchetypeAfterAddComponent(currentArchetype, componentId);
+			Archetype destinationArchetype = ArchetypesGraph.ArchetypeAfterAddComponent(currentArchetype, componentId);
 			
 			Assert.IsNotNull(destinationArchetype.Table, "This can not happened. After adding component to archetype, there MUST be table.");
 
 			// Reserve row in destination archetype
 			var destinationEntityRow = destinationArchetype.Table.ReserveRow();
-			var destinationComponentColumn = _componentsStorage.GetColumnInTable(componentId, destinationArchetype.TableId);
+			var destinationComponentColumn = ComponentsStorage.GetColumnInTable(componentId, destinationArchetype.TableId);
 
 			if (currentArchetype.Table != null)
 			{
 				// Copy current components from current archetype to destination archetype
 				TableUtils.CopyRow(currentArchetype.Table, currentEntityRow,
 					destinationArchetype.Table, destinationEntityRow,
-					currentArchetype.Components, _componentsStorage);
+					currentArchetype.Components, ComponentsStorage);
 				
 				// Free reserved row in current archetype
 				currentArchetype.Table.FreeRow(currentEntityRow);
@@ -161,19 +176,19 @@ namespace ECS
 			// Copy added component value to destination archetype
 			destinationArchetype.Table
 				.Columns[destinationComponentColumn]
-				.GetRef<T>(destinationEntityRow) = value;
+				.GetElementRef<T>(destinationEntityRow) = value;
 
 			currentArchetype.Entities.Remove(entityId);
 			destinationArchetype.Entities.Add(entityId);
 			
-			_entitiesStorage[entityId] = new EntityInfo(destinationArchetype, destinationEntityRow);
+			EntitiesStorage[entityId] = new EntityInfo(destinationArchetype, destinationEntityRow);
 		}
 		
 		private void RemoveComponent(EcsId entityId, EcsTypeInfo typeInfo)
 		{
 			EcsId componentId = typeInfo.Id;
 			
-			EntityInfo currentEntityInfo = _entitiesStorage[entityId];
+			EntityInfo currentEntityInfo = EntitiesStorage[entityId];
 			Archetype currentArchetype = currentEntityInfo.Archetype;
 			int currentEntityRow = currentEntityInfo.RowInTable;
 			
@@ -186,7 +201,7 @@ namespace ECS
 			
 			Assert.IsNotNull(currentArchetype.Table, "This can not happened. If there is component, there MUST be table.");
 			
-			Archetype destinationArchetype = _archetypesGraph.ArchetypeAfterRemoveComponent(currentArchetype, componentId);
+			Archetype destinationArchetype = ArchetypesGraph.ArchetypeAfterRemoveComponent(currentArchetype, componentId);
 
 			// Free reserved row in current archetype
 			currentArchetype.Table.FreeRow(currentEntityRow);
@@ -201,18 +216,18 @@ namespace ECS
 				// Copy destination components from current archetype to destination archetype
 				TableUtils.CopyRow(currentArchetype.Table, currentEntityRow,
 					destinationArchetype.Table, destinationEntityRow,
-					destinationArchetype.Components, _componentsStorage);
+					destinationArchetype.Components, ComponentsStorage);
 			}
 			
 			currentArchetype.Entities.Remove(entityId);
 			destinationArchetype.Entities.Add(entityId);
 			
-			_entitiesStorage[entityId] = new EntityInfo(destinationArchetype, destinationEntityRow);
+			EntitiesStorage[entityId] = new EntityInfo(destinationArchetype, destinationEntityRow);
 		}
 
 		private void AddThing(EcsId entityId, EcsId thingId)
 		{
-			EntityInfo currentEntityInfo = _entitiesStorage[entityId];
+			EntityInfo currentEntityInfo = EntitiesStorage[entityId];
 			Archetype currentArchetype = currentEntityInfo.Archetype;
 
 			// Check if current archetype already contains this thing
@@ -221,17 +236,17 @@ namespace ECS
 				return;
 			}
 			
-			Archetype destinationArchetype = _archetypesGraph.ArchetypeAfterAddTag(currentArchetype, thingId);
+			Archetype destinationArchetype = ArchetypesGraph.ArchetypeAfterAddThing(currentArchetype, thingId);
 
 			currentArchetype.Entities.Remove(entityId);
 			destinationArchetype.Entities.Add(entityId);
 			
-			_entitiesStorage[entityId] = new EntityInfo(destinationArchetype, currentEntityInfo.RowInTable);
+			EntitiesStorage[entityId] = new EntityInfo(destinationArchetype, currentEntityInfo.RowInTable);
 		}
 		
 		private void RemoveThing(EcsId entityId, EcsId thingId)
 		{
-			EntityInfo currentEntityInfo = _entitiesStorage[entityId];
+			EntityInfo currentEntityInfo = EntitiesStorage[entityId];
 			Archetype currentArchetype = currentEntityInfo.Archetype;
 			
 			// Check if current archetype already NOT contains this thing
@@ -240,12 +255,12 @@ namespace ECS
 				return;
 			}
 			
-			Archetype destinationArchetype = _archetypesGraph.ArchetypeAfterRemoveThing(currentArchetype, thingId);
+			Archetype destinationArchetype = ArchetypesGraph.ArchetypeAfterRemoveThing(currentArchetype, thingId);
 
 			currentArchetype.Entities.Remove(entityId);
 			destinationArchetype.Entities.Add(entityId);
 			
-			_entitiesStorage[entityId] = new EntityInfo(destinationArchetype, currentEntityInfo.RowInTable);
+			EntitiesStorage[entityId] = new EntityInfo(destinationArchetype, currentEntityInfo.RowInTable);
 		}
 	}
 }

@@ -10,10 +10,10 @@ namespace ECS
 		private readonly TablesStorage _tablesStorage;
 		private readonly Dictionary<ArchetypeId, Archetype> _archetypes;
 		
-		public ArchetypesStorage(TablesStorage tablesStorage, Archetype defaultArchetype)
+		public ArchetypesStorage(TablesStorage tablesStorage)
 		{
 			_tablesStorage = tablesStorage;
-			_archetypes = new Dictionary<ArchetypeId, Archetype> { { defaultArchetype.ArchetypeId, defaultArchetype } };
+			_archetypes = new Dictionary<ArchetypeId, Archetype>();
 		}
 		
 		public Archetype GetOrCreateArchetypeFor(SortedSet<EcsId> components, SortedSet<EcsId> things)

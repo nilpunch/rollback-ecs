@@ -5,31 +5,44 @@ using System.Runtime.InteropServices;
 
 namespace ECS
 {
+	/// <summary>
+	/// Contains
+	/// </summary>
 	public class TypesStorage
 	{
-		private readonly EntitiesStorage _entitiesStorage;
 		private readonly Dictionary<Type, EcsTypeInfo> _typeInfoByType;
 		private readonly Dictionary<EcsId, EcsTypeInfo> _typeInfoById;
 
-		public TypesStorage(EntitiesStorage entitiesStorage)
+		public TypesStorage()
 		{
-			_entitiesStorage = entitiesStorage;
 			_typeInfoByType = new Dictionary<Type, EcsTypeInfo>();
 			_typeInfoById = new Dictionary<EcsId, EcsTypeInfo>();
 		}
 
-		public EcsTypeInfo EnsureRegistered<T>() where T : unmanaged
+		public EcsTypeInfo RegisterTypeWithId<T>(EcsId ecsId) where T : unmanaged
 		{
 			var type = typeof(T);
 
-			if (!_typeInfoByType.TryGetValue(type, out var typeInfo))
-			{
-				typeInfo = new EcsTypeInfo(_entitiesStorage.Create(), Marshal.SizeOf(type), HasAnyFields(type));
-				_typeInfoByType.Add(type, typeInfo);
-				_typeInfoById.Add(typeInfo.Id, typeInfo);
-			}
+			var typeInfo = new EcsTypeInfo(ecsId, Marshal.SizeOf(type), HasAnyFields(type));
+			_typeInfoByType.Add(type, typeInfo);
+			_typeInfoById.Add(typeInfo.Id, typeInfo);
 
 			return typeInfo;
+		}
+
+		public bool TryGetTypeInfo<T>(out EcsTypeInfo info) where T : unmanaged
+		{
+			return _typeInfoByType.TryGetValue(typeof(T), out info);
+		}
+		
+		public bool IsRegistered<T>() where T : unmanaged
+		{
+			return _typeInfoByType.ContainsKey(typeof(T));
+		}
+
+		public bool IsRegistered(EcsId id)
+		{
+			return _typeInfoById.ContainsKey(id);
 		}
 
 		public EcsTypeInfo GetTypeInfo(EcsId id)

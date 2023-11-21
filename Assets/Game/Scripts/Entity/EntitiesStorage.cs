@@ -7,13 +7,11 @@ namespace ECS
     /// </summary>
     public class EntitiesStorage
     {
-        private readonly Archetype _defaultArchetype;
         private readonly Dictionary<EcsId, EntityInfo> _entities;
         private readonly EcsIdGenerator _ecsIdGenerator;
 
-        public EntitiesStorage(Archetype defaultArchetype)
+        public EntitiesStorage()
         {
-            _defaultArchetype = defaultArchetype;
             _entities = new Dictionary<EcsId, EntityInfo>();
             _ecsIdGenerator = new EcsIdGenerator();
         }
@@ -24,11 +22,12 @@ namespace ECS
             set => _entities[id] = value;
         }
 
-        public EcsId Create()
+        public EcsId CreateInArchetype(Archetype archetype)
         {
             EcsId entityId = _ecsIdGenerator.ReserveId();
-            _entities.Add(entityId, new EntityInfo(_defaultArchetype));
-            _defaultArchetype.Entities.Add(entityId);
+            int entityRow = archetype.Table?.ReserveRow() ?? -1;
+            archetype.Entities.Add(entityId);
+            _entities.Add(entityId, new EntityInfo(archetype, entityRow));
             return entityId;
         }
 
