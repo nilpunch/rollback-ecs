@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine.Assertions;
 
 namespace ECS
 {
 	public delegate void ActionRef<T>(ref T value);
-	
+
 	public class World
 	{
 		public World()
@@ -72,14 +71,13 @@ namespace ECS
 				throw new Exception("Entity doesn't have this component.");
 			}
 
-			return ref entityTable
-				.Columns[componentColumnInTable].Data
-				.GetElementRef<T>(entityInfo.RowInTable);
+			return ref entityTable.Columns[componentColumnInTable].Data.GetElementRef<T>(entityInfo.RowInTable);
 		}
 
 		public bool Has<T>(EcsId entityId) where T : unmanaged
 		{
 			EcsTypeInfo typeInfo = EnsureTypeRegistered<T>();
+
 			EntityInfo entityInfo = EntitiesStorage[entityId];
 			return ComponentsStorage.ContainedInTable(typeInfo.Id, entityInfo.Table.TableId);
 		}
@@ -101,50 +99,43 @@ namespace ECS
 		private void AddComponent<T>(EcsId entity, EcsTypeInfo typeInfo, T value) where T : unmanaged
 		{
 			EcsId componentId = typeInfo.Id;
+			EntityInfo entityInfo = EntitiesStorage[entity];
 
-			EntityInfo currentEntityInfo = EntitiesStorage[entity];
-			Table currentTable = currentEntityInfo.Table;
-			int currentEntityRow = currentEntityInfo.RowInTable;
-
-			// Check if current archetype already contains this component,
-			// then just update existed component value
-			if (currentTable.Type.Contains(componentId))
+			// Check if current table already contains this component
+			if (ComponentsStorage.TryGetColumnInTable(componentId, entityInfo.Table.TableId, out var componentColumn))
 			{
-				int currentComponentColumn = ComponentsStorage.GetColumnInTable(componentId, currentTable.TableId);
-				currentTable
-					.Columns[currentComponentColumn].Data
-					.GetElementRef<T>(currentEntityRow) = value;
+				// Then just update existed component, if it has data
+				if (typeInfo.HasFields)
+				{
+					entityInfo.Table.Columns[componentColumn].Data.GetElementRef<T>(entityInfo.RowInTable) = value;
+				}
+
 				return;
 			}
 
-			Table destinationTable = TableGraph.TableAfterAdd(currentTable, componentId);
+			Table destinationTable = TableGraph.TableAfterAdd(entityInfo.Table, componentId);
 			EntityInfo updatedEntityInfo = EntitiesStorage.MoveEntity(entity, destinationTable);
-			
-			// Copy added component value to destination archetype
+
+			// Copy added component to destination archetype, if it has data
 			if (typeInfo.HasFields)
 			{
 				int destinationComponentColumn = ComponentsStorage.GetColumnInTable(componentId, destinationTable.TableId);
-				destinationTable
-					.Columns[destinationComponentColumn].Data
-					.GetElementRef<T>(updatedEntityInfo.RowInTable) = value;
+				destinationTable.Columns[destinationComponentColumn].Data.GetElementRef<T>(updatedEntityInfo.RowInTable) = value;
 			}
 		}
 
 		private void RemoveComponent(EcsId entity, EcsTypeInfo typeInfo)
 		{
 			EcsId componentId = typeInfo.Id;
+			EntityInfo entityInfo = EntitiesStorage[entity];
 
-			EntityInfo currentEntityInfo = EntitiesStorage[entity];
-			Table currentTable = currentEntityInfo.Table;
-
-			// Check if current archetype already NOT contains this component,
-			// then just do nothing
-			if (!currentTable.Type.Contains(componentId))
+			// Check if current table already NOT contains this component
+			if (!ComponentsStorage.ContainedInTable(componentId, entityInfo.Table.TableId))
 			{
 				return;
 			}
 
-			Table destinationTable = TableGraph.ArchetypeAfterRemove(currentTable, componentId);
+			Table destinationTable = TableGraph.ArchetypeAfterRemove(entityInfo.Table, componentId);
 			EntitiesStorage.MoveEntity(entity, destinationTable);
 		}
 	}

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace ECS
+﻿namespace ECS
 {
 	public static class TableUtils
 	{
@@ -16,7 +14,7 @@ namespace ECS
 
 				EcsId sourceComponentId = sourceColumn.ComponentId;
 				EcsId destinationComponentId = destinationColumn.ComponentId;
-				
+
 				if (sourceComponentId == destinationComponentId)
 				{
 					UnmanagedUtils.CopyElement(sourceColumn.Data, sourceRow, destinationColumn.Data, destinationRow);

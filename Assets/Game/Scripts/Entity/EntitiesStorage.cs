@@ -26,9 +26,9 @@ namespace ECS
 		public EcsId CreateEntityInTable(Table table)
 		{
 			EcsId entity = _ecsIdGenerator.NewId();
-			
+
 			AddEntityToTable(entity, table);
-			
+
 			return entity;
 		}
 
@@ -38,7 +38,7 @@ namespace ECS
 			{
 				return;
 			}
-			
+
 			RemoveRowFromTable(entityInfo.Table, entityInfo.RowInTable);
 
 			_entities.Remove(entity);
@@ -56,11 +56,11 @@ namespace ECS
 			{
 				return entityInfo;
 			}
-			
+
 			AddEntityToTable(entity, destination);
-			
+
 			TableUtils.CopyRow(entityInfo.Table, entityInfo.RowInTable, destination, destination.LastRowIndex);
-			
+
 			RemoveRowFromTable(entityInfo.Table, entityInfo.RowInTable);
 
 			return new EntityInfo(destination, destination.LastRowIndex);
@@ -69,7 +69,7 @@ namespace ECS
 		private void RemoveRowFromTable(Table table, int rowIndex)
 		{
 			table.SwapRemoveRow(rowIndex);
-			
+
 			if (rowIndex <= table.LastRowIndex)
 			{
 				EcsId swappedEntity = table.Entities[rowIndex];

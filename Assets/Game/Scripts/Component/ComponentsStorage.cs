@@ -18,7 +18,7 @@ namespace ECS
 		{
 			return GetOrCreateInfo(componentId).ColumnInTables.TryGetValue(tableId, out column);
 		}
-		
+
 		public int GetColumnInTable(EcsId componentId, TableId tableId)
 		{
 			return GetOrCreateInfo(componentId).ColumnInTables[tableId];

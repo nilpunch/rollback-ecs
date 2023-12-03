@@ -11,7 +11,7 @@ namespace ECS
 		public readonly Column[] Columns;
 
 		public int LastRowIndex => Entities.Count - 1;
-		
+
 		public Table(SortedSet<EcsId> type, Column[] columns)
 		{
 			Entities = new List<EcsId>();
@@ -33,7 +33,7 @@ namespace ECS
 			{
 				column.Data.Swap(Entities.Count - 1, rowIndex);
 			}
-			
+
 			Entities.RemoveBySwap(rowIndex);
 		}
 
@@ -43,12 +43,12 @@ namespace ECS
 			{
 				return;
 			}
-			
+
 			if (!Columns[0].Data.IsResizeable)
 			{
 				throw new Exception("Entities limit reached.");
 			}
-			
+
 			foreach (var column in Columns)
 			{
 				column.Data.Resize(capacity * 2);

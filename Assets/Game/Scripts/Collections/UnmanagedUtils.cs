@@ -5,7 +5,7 @@ namespace ECS
 	public static class UnmanagedUtils
 	{
 		private static readonly byte[] _swapBuffer = new byte[1024];
-		
+
 		public static unsafe void CopyElement(IUnmanagedArray source, int sourceIndex, IUnmanagedArray destination, int destinationIndex)
 		{
 			if (source.SizeOfElement != destination.SizeOfElement)
@@ -46,7 +46,7 @@ namespace ECS
 				Buffer.MemoryCopy(temp, destinationElement.ToPointer(), sizeOfElement, sizeOfElement);
 			}
 		}
-		
+
 		public static unsafe Span<T> AsSpan<T>(this IUnmanagedArray source) where T : unmanaged
 		{
 			return new Span<T>(source.Pointer.ToPointer(), source.Capacity);

@@ -12,7 +12,7 @@ namespace ECS
 		}
 
 		public int ArrayIndex => (int)Index;
-		
+
 		public uint Index => (uint)(Id & 0xffffffff);
 
 		public uint Generation => (uint)(Id >> 32);

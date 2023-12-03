@@ -43,9 +43,7 @@ namespace ECS
 			var newHandle = GCHandle.Alloc(newData, GCHandleType.Pinned);
 			var newPointer = newHandle.AddrOfPinnedObject();
 
-			Buffer.MemoryCopy(Pointer.ToPointer(), newPointer.ToPointer(),
-				Capacity * SizeOfElement,
-				Capacity * SizeOfElement);
+			Buffer.MemoryCopy(Pointer.ToPointer(), newPointer.ToPointer(), Capacity * SizeOfElement, Capacity * SizeOfElement);
 
 			Handle.Free();
 			Handle = newHandle;

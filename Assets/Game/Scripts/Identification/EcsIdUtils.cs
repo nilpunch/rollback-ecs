@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace ECS
 {
 	public struct SortedArray<T>
 	{
-		
 	}
-	
+
 	public static class EcsIdUtils
 	{
 		public static TableId CombineTableId(SortedSet<EcsId> type)
