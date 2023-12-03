@@ -17,6 +17,21 @@ namespace ECS
 
 		public uint Generation => (uint)(Id >> 32);
 
+		public static EcsId IncreaseGeneration(EcsId ecsId)
+		{
+			unchecked
+			{
+				return FromIndexGeneration(ecsId.Index, ecsId.Generation + 1);
+			}
+		}
+
+		public static EcsId FromIndexGeneration(uint index, uint generation)
+		{
+			// Combine index and generation to create the EcsId
+			ulong id = ((ulong)generation << 32) | index;
+			return new EcsId(id);
+		}
+
 		public static bool operator ==(EcsId a, EcsId b)
 		{
 			return a.Id == b.Id;
@@ -27,19 +42,19 @@ namespace ECS
 			return !(a == b);
 		}
 
-		public static EcsId IncreaseGeneration(EcsId ecsId)
+		public bool Equals(EcsId other)
 		{
-			unchecked
-			{
-				return FromIndexGeneration(ecsId.Index, ecsId.Generation + 1);
-			}
+			return Id == other.Id;
 		}
-		
-		public static EcsId FromIndexGeneration(uint index, uint generation)
+
+		public override bool Equals(object obj)
 		{
-			// Combine index and generation to create the EcsId
-			ulong id = ((ulong)generation << 32) | index;
-			return new EcsId(id);
+			return obj is EcsId other && Equals(other);
+		}
+
+		public override int GetHashCode()
+		{
+			return Id.GetHashCode();
 		}
 
 		public int CompareTo(EcsId other)

@@ -11,9 +11,9 @@ namespace ECS
 	
 	public static class EcsIdUtils
 	{
-		public static ArchetypeId CalculateArchetype(SortedSet<EcsId> type)
+		public static TableId CombineTableId(SortedSet<EcsId> type)
 		{
-			return new ArchetypeId(CombineIds(type));
+			return new TableId(CombineIds(type));
 		}
 
 		private static ulong CombineIds(SortedSet<EcsId> ids)

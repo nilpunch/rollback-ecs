@@ -67,7 +67,7 @@ namespace ECS
 			EntityInfo entityInfo = EntitiesStorage[entityId];
 			Table entityTable = entityInfo.Table;
 
-			if (!ComponentsStorage.TryGetColumnInTable(typeInfo.Id, entityTable.ArchetypeId, out var componentColumnInTable))
+			if (!ComponentsStorage.TryGetColumnInTable(typeInfo.Id, entityTable.TableId, out var componentColumnInTable))
 			{
 				throw new Exception("Entity doesn't have this component.");
 			}
@@ -81,7 +81,7 @@ namespace ECS
 		{
 			EcsTypeInfo typeInfo = EnsureTypeRegistered<T>();
 			EntityInfo entityInfo = EntitiesStorage[entityId];
-			return ComponentsStorage.HasColumnInTable(typeInfo.Id, entityInfo.Table.ArchetypeId);
+			return ComponentsStorage.ContainedInTable(typeInfo.Id, entityInfo.Table.TableId);
 		}
 
 		public void Remove<T>(EcsId entityId) where T : unmanaged
@@ -110,7 +110,7 @@ namespace ECS
 			// then just update existed component value
 			if (currentTable.Type.Contains(componentId))
 			{
-				int currentComponentColumn = ComponentsStorage.GetColumnInTable(componentId, currentTable.ArchetypeId);
+				int currentComponentColumn = ComponentsStorage.GetColumnInTable(componentId, currentTable.TableId);
 				currentTable
 					.Columns[currentComponentColumn].Data
 					.GetElementRef<T>(currentEntityRow) = value;
@@ -123,7 +123,7 @@ namespace ECS
 			// Copy added component value to destination archetype
 			if (typeInfo.HasFields)
 			{
-				int destinationComponentColumn = ComponentsStorage.GetColumnInTable(componentId, destinationTable.ArchetypeId);
+				int destinationComponentColumn = ComponentsStorage.GetColumnInTable(componentId, destinationTable.TableId);
 				destinationTable
 					.Columns[destinationComponentColumn].Data
 					.GetElementRef<T>(updatedEntityInfo.RowInTable) = value;

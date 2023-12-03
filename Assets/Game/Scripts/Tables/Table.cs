@@ -5,7 +5,7 @@ namespace ECS
 {
 	public class Table
 	{
-		public readonly ArchetypeId ArchetypeId;
+		public readonly TableId TableId;
 		public readonly SortedSet<EcsId> Type;
 		public readonly List<EcsId> Entities;
 		public readonly Column[] Columns;
@@ -16,7 +16,7 @@ namespace ECS
 		{
 			Entities = new List<EcsId>();
 			Columns = columns;
-			ArchetypeId = EcsIdUtils.CalculateArchetype(type);
+			TableId = EcsIdUtils.CombineTableId(type);
 			Type = type;
 		}
 

@@ -4,11 +4,11 @@ namespace ECS
 {
 	public class ComponentTables
 	{
-		public readonly Dictionary<ArchetypeId, int> ColumnInTables;
+		public readonly Dictionary<TableId, int> ColumnInTables;
 
 		public ComponentTables()
 		{
-			ColumnInTables = new Dictionary<ArchetypeId, int>();
+			ColumnInTables = new Dictionary<TableId, int>();
 		}
 	}
 }

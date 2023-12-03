@@ -3,7 +3,7 @@
 namespace ECS
 {
 	/// <summary>
-	/// Container for all components and their matched tables.
+	/// Container for all components (and tags) and their matched tables.
 	/// </summary>
 	public class ComponentsStorage
 	{
@@ -14,19 +14,19 @@ namespace ECS
 			_componentInfos = new Dictionary<EcsId, ComponentTables>();
 		}
 
-		public bool TryGetColumnInTable(EcsId componentId, ArchetypeId archetypeId, out int column)
+		public bool TryGetColumnInTable(EcsId componentId, TableId tableId, out int column)
 		{
-			return GetOrCreateInfo(componentId).ColumnInTables.TryGetValue(archetypeId, out column);
+			return GetOrCreateInfo(componentId).ColumnInTables.TryGetValue(tableId, out column);
 		}
 		
-		public int GetColumnInTable(EcsId componentId, ArchetypeId archetypeId)
+		public int GetColumnInTable(EcsId componentId, TableId tableId)
 		{
-			return GetOrCreateInfo(componentId).ColumnInTables[archetypeId];
+			return GetOrCreateInfo(componentId).ColumnInTables[tableId];
 		}
 
-		public bool HasColumnInTable(EcsId componentId, ArchetypeId archetypeId)
+		public bool ContainedInTable(EcsId componentId, TableId tableId)
 		{
-			return GetOrCreateInfo(componentId).ColumnInTables.ContainsKey(archetypeId);
+			return GetOrCreateInfo(componentId).ColumnInTables.ContainsKey(tableId);
 		}
 
 		public ComponentTables GetOrCreateInfo(EcsId componentId)
