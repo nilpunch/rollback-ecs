@@ -7,7 +7,7 @@ namespace ECS
 		private readonly Stack<EcsId> _freeIds = new Stack<EcsId>();
 		private EcsId _nextFreeId;
 
-		public EcsId ReserveId()
+		public EcsId NewId()
 		{
 			if (_freeIds.Count != 0)
 			{
@@ -26,7 +26,7 @@ namespace ECS
 			return freeId;
 		}
 
-		public void FreeEntityId(EcsId ecsId)
+		public void RecycleEntityId(EcsId ecsId)
 		{
 			_freeIds.Push(EcsId.FromIndexGeneration(ecsId.Index, ecsId.Generation + 1));
 		}

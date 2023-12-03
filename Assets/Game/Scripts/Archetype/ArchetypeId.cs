@@ -2,23 +2,23 @@
 
 namespace ECS
 {
-	public readonly struct TableId : IEquatable<TableId>
+	public readonly struct ArchetypeId : IEquatable<ArchetypeId>
 	{
-		public readonly long Id;
+		public readonly ulong Id;
 
-		public TableId(long id)
+		public ArchetypeId(ulong id)
 		{
 			Id = id;
 		}
 
-		public bool Equals(TableId other)
+		public bool Equals(ArchetypeId other)
 		{
 			return Id == other.Id;
 		}
 
 		public override bool Equals(object obj)
 		{
-			return obj is TableId other && Equals(other);
+			return obj is ArchetypeId other && Equals(other);
 		}
 
 		public override int GetHashCode()

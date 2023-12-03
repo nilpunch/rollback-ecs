@@ -74,7 +74,7 @@ namespace ECS
 
 			foreach (var ent in entities)
 			{
-				world.Add(ent, new Armor() { Defense = ent.Index });
+				world.Add(ent, new Armor() { Defense = (int)ent.Index });
 			}
 
 			Debug.Log("defense = " + world.GetComponent<Armor>(entity).Defense);

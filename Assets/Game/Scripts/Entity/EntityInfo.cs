@@ -2,12 +2,12 @@
 {
 	public readonly struct EntityInfo
 	{
-		public readonly Archetype Archetype;
+		public readonly Table Table;
 		public readonly int RowInTable;
 
-		public EntityInfo(Archetype archetype, int rowInTable = -1)
+		public EntityInfo(Table table, int rowInTable)
 		{
-			Archetype = archetype;
+			Table = table;
 			RowInTable = rowInTable;
 		}
 	}

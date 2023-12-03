@@ -14,14 +14,19 @@ namespace ECS
 			_componentInfos = new Dictionary<EcsId, ComponentTables>();
 		}
 
-		public int GetColumnInTable(EcsId componentId, TableId tableId)
+		public bool TryGetColumnInTable(EcsId componentId, ArchetypeId archetypeId, out int column)
 		{
-			return GetOrCreateInfo(componentId).ColumnInTables[tableId];
+			return GetOrCreateInfo(componentId).ColumnInTables.TryGetValue(archetypeId, out column);
+		}
+		
+		public int GetColumnInTable(EcsId componentId, ArchetypeId archetypeId)
+		{
+			return GetOrCreateInfo(componentId).ColumnInTables[archetypeId];
 		}
 
-		public bool HasColumnInTable(EcsId componentId, TableId tableId)
+		public bool HasColumnInTable(EcsId componentId, ArchetypeId archetypeId)
 		{
-			return GetOrCreateInfo(componentId).ColumnInTables.ContainsKey(tableId);
+			return GetOrCreateInfo(componentId).ColumnInTables.ContainsKey(archetypeId);
 		}
 
 		public ComponentTables GetOrCreateInfo(EcsId componentId)

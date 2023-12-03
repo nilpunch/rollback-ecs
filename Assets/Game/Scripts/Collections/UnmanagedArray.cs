@@ -3,9 +3,9 @@ using System.Runtime.InteropServices;
 
 namespace ECS
 {
-	public class ResizableDataContainer : IDataContainer
+	public class UnmanagedArray : IUnmanagedArray
 	{
-		private ResizableDataContainer(IntPtr data, GCHandle handle, int capacity, int sizeOfElement)
+		private UnmanagedArray(IntPtr data, GCHandle handle, int capacity, int sizeOfElement)
 		{
 			Handle = handle;
 			Pointer = data;
@@ -23,18 +23,18 @@ namespace ECS
 
 		private GCHandle Handle { get; set; }
 
-		public static IDataContainer Create<T>(int capacity) where T : unmanaged
+		public static IUnmanagedArray Create<T>(int capacity) where T : unmanaged
 		{
 			return Create(capacity, Marshal.SizeOf<T>());
 		}
 
-		public static IDataContainer Create(int capacity, int sizeOfElement)
+		public static IUnmanagedArray Create(int capacity, int sizeOfElement)
 		{
 			var data = new byte[capacity * sizeOfElement];
 			var handle = GCHandle.Alloc(data, GCHandleType.Pinned);
 			var pointer = handle.AddrOfPinnedObject();
 
-			return new ResizableDataContainer(pointer, handle, capacity, sizeOfElement);
+			return new UnmanagedArray(pointer, handle, capacity, sizeOfElement);
 		}
 
 		public unsafe void Resize(int newCapacity)
@@ -53,7 +53,7 @@ namespace ECS
 			Capacity = newCapacity;
 		}
 
-		~ResizableDataContainer()
+		~UnmanagedArray()
 		{
 			Handle.Free();
 		}

@@ -4,15 +4,33 @@ namespace ECS
 {
 	public static class TableUtils
 	{
-		public static void CopyRow(Table source, int sourceRow, Table destination, int destinationRow,
-			IEnumerable<EcsId> componentsToCopy, ComponentsStorage componentsStorage)
+		public static void CopyRow(Table source, int sourceRow, Table destination, int destinationRow)
 		{
-			foreach (var componentId in componentsToCopy)
-			{
-				var sourceColumn = source.Columns[componentsStorage.GetColumnInTable(componentId, source.TableId)];
-				var destinationColumn = destination.Columns[componentsStorage.GetColumnInTable(componentId, destination.TableId)];
+			int sourceColumnIndex = 0;
+			int destinationColumnIndex = 0;
 
-				DataContainerUtils.CopyElement(sourceColumn, sourceRow, destinationColumn, destinationRow);
+			while (sourceColumnIndex < source.Columns.Length && destinationColumnIndex < destination.Columns.Length)
+			{
+				Column sourceColumn = source.Columns[sourceColumnIndex];
+				Column destinationColumn = destination.Columns[destinationColumnIndex];
+
+				EcsId sourceComponentId = sourceColumn.ComponentId;
+				EcsId destinationComponentId = destinationColumn.ComponentId;
+				
+				if (sourceComponentId == destinationComponentId)
+				{
+					UnmanagedUtils.CopyElement(sourceColumn.Data, sourceRow, destinationColumn.Data, destinationRow);
+					sourceColumnIndex += 1;
+					destinationColumnIndex += 1;
+				}
+				else if (sourceComponentId.Id < destinationComponentId.Id)
+				{
+					sourceColumnIndex += 1;
+				}
+				else
+				{
+					destinationColumnIndex += 1;
+				}
 			}
 		}
 	}

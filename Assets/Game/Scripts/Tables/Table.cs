@@ -1,51 +1,58 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ECS
 {
 	public class Table
 	{
-		private readonly TableIndices _indices;
-		private readonly IDataContainer _oneOfColumns;
+		public readonly ArchetypeId ArchetypeId;
+		public readonly SortedSet<EcsId> Type;
+		public readonly List<EcsId> Entities;
+		public readonly Column[] Columns;
 
-		public readonly TableId TableId;
-		public readonly IDataContainer[] Columns;
-
-		public Table(TableId tableId, IDataContainer[] columns)
+		public int LastRowIndex => Entities.Count - 1;
+		
+		public Table(SortedSet<EcsId> type, Column[] columns)
 		{
+			Entities = new List<EcsId>();
 			Columns = columns;
-			TableId = tableId;
-			_indices = new TableIndices();
-
-			// Assuming that each column is the same type of data container with same amount of elements
-			_oneOfColumns = Columns[0];
+			ArchetypeId = EcsIdUtils.CalculateArchetype(type);
+			Type = type;
 		}
 
-		public int ReserveRow()
+		public void AppendEntity(EcsId entityIndex)
 		{
-			int reservedRow = _indices.ReserveRow();
+			Entities.Add(entityIndex);
 
-			if (reservedRow < _oneOfColumns.Capacity)
-			{
-				return reservedRow;
-			}
+			EnsureCapacity(Entities.Count);
+		}
 
-			if (!_oneOfColumns.IsResizeable)
-			{
-				throw new InvalidOperationException("Table reach it's max capacity.");
-			}
-
-			int newCapacity = _oneOfColumns.Capacity * 2;
+		public void SwapRemoveRow(int rowIndex)
+		{
 			foreach (var column in Columns)
 			{
-				column.Resize(newCapacity);
+				column.Data.Swap(Entities.Count - 1, rowIndex);
 			}
-
-			return reservedRow;
+			
+			Entities.RemoveBySwap(rowIndex);
 		}
 
-		public void FreeRow(int rowIndex)
+		private void EnsureCapacity(int capacity)
 		{
-			_indices.FreeRow(rowIndex);
+			if (Columns.Length == 0 || Columns[0].Data.Capacity >= capacity)
+			{
+				return;
+			}
+			
+			if (!Columns[0].Data.IsResizeable)
+			{
+				throw new Exception("Entities limit reached.");
+			}
+			
+			foreach (var column in Columns)
+			{
+				column.Data.Resize(capacity * 2);
+			}
 		}
 	}
 }
