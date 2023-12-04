@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 namespace ECS
 {
-	public delegate void ActionRef<T>(ref T value);
-
 	public class World
 	{
 		public World()
@@ -53,6 +51,13 @@ namespace ECS
 			return typeInfo;
 		}
 
+		public EcsId GetComponentId<T>() where T : unmanaged
+		{
+			var typeInfo = EnsureTypeRegistered<T>();
+
+			return typeInfo.Id;
+		}
+		
 		public ref T GetComponent<T>(EcsId entityId) where T : unmanaged
 		{
 			var typeInfo = EnsureTypeRegistered<T>();
