@@ -26,9 +26,9 @@ namespace ECS
 			return freeId;
 		}
 
-		public void RecycleEntityId(EcsId ecsId)
+		public void RecycleEntityId(EcsId entity)
 		{
-			_freeIds.Push(EcsId.FromIndexGeneration(ecsId.Index, ecsId.Generation + 1));
+			_freeIds.Push(EcsId.IncreaseGeneration(entity));
 		}
 	}
 }

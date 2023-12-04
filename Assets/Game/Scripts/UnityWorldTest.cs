@@ -26,7 +26,7 @@ namespace ECS
 
 			Debug.Log("has health = " + world.Has<Health>(entity));
 
-			world.Add(entity, new Health() { Amount = 10 });
+			world.Set(entity, new Health() { Amount = 10 });
 
 			Debug.Log("has health = " + world.Has<Health>(entity));
 
@@ -34,15 +34,15 @@ namespace ECS
 
 			Debug.Log("has tag = " + world.Has<Tag>(entity));
 
-			world.Add(entity, new Tag());
+			world.Set(entity, new Tag());
 
 			Debug.Log("has tag = " + world.Has<Tag>(entity));
 
-			world.Add(entity, new Health() { Amount = 9 });
+			world.Set(entity, new Health() { Amount = 9 });
 
 			Debug.Log("health = " + world.GetComponent<Health>(entity).Amount);
 
-			world.Add(entity, new Armor() { Defense = 2 });
+			world.Set(entity, new Armor() { Defense = 2 });
 
 			Debug.Log("health = " + world.GetComponent<Health>(entity).Amount);
 			Debug.Log("defense = " + world.GetComponent<Armor>(entity).Defense);
@@ -73,7 +73,7 @@ namespace ECS
 
 			foreach (var ent in entities)
 			{
-				world.Add(ent, new Armor() { Defense = (int)ent.Index });
+				world.Set(ent, new Armor() { Defense = (int)ent.Index });
 			}
 
 			Debug.Log("defense = " + world.GetComponent<Armor>(entity).Defense);

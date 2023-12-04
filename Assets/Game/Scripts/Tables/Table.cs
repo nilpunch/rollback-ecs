@@ -23,17 +23,12 @@ namespace ECS
 		public void AppendEntity(EcsId entityIndex)
 		{
 			Entities.Add(entityIndex);
-
 			EnsureCapacity(Entities.Count);
 		}
 
 		public void SwapRemoveRow(int rowIndex)
 		{
-			foreach (var column in Columns)
-			{
-				column.Data.Swap(Entities.Count - 1, rowIndex);
-			}
-
+			TableUtils.CopyRow(this, Entities.Count - 1, this, rowIndex);
 			Entities.RemoveBySwap(rowIndex);
 		}
 

@@ -18,9 +18,9 @@ namespace ECS
 
 			DefaultTable = TablesStorage.GetOrCreateArchetypeFor(type: new SortedSet<EcsId>());
 
-			EcsComponentId = EntitiesStorage.CreateEntityInTable(DefaultTable);
-			TypesStorage.RegisterTypeWithId<EcsComponent>(EcsComponentId);
-			ComponentsTable = TableGraph.TableAfterAdd(DefaultTable, EcsComponentId);
+			var ecsComponentId = EntitiesStorage.CreateEntityInTable(DefaultTable);
+			TypesStorage.RegisterTypeWithId<EcsComponent>(ecsComponentId);
+			ComponentsTable = TableGraph.TableAfterAdd(DefaultTable, ecsComponentId);
 		}
 
 		public ComponentsStorage ComponentsStorage { get; }
@@ -31,7 +31,6 @@ namespace ECS
 
 		public Table DefaultTable { get; }
 		public Table ComponentsTable { get; }
-		public EcsId EcsComponentId { get; }
 
 		public EcsId CreateEntity()
 		{
@@ -66,12 +65,12 @@ namespace ECS
 			EntityInfo entityInfo = EntitiesStorage[entityId];
 			Table entityTable = entityInfo.Table;
 
-			if (!ComponentsStorage.TryGetColumnInTable(typeInfo.Id, entityTable.TableId, out var componentColumnInTable))
+			if (!ComponentsStorage.TryGetColumnInTable(typeInfo.Id, entityTable.TableId, out var componentColumn))
 			{
 				throw new Exception("Entity doesn't have this component.");
 			}
 
-			return ref entityTable.Columns[componentColumnInTable].Data.GetElementRef<T>(entityInfo.RowInTable);
+			return ref entityTable.Columns[componentColumn].Data.GetElementRef<T>(entityInfo.RowInTable);
 		}
 
 		public bool Has<T>(EcsId entityId) where T : unmanaged
@@ -89,7 +88,7 @@ namespace ECS
 			RemoveComponent(entityId, typeInfo);
 		}
 
-		public void Add<T>(EcsId entityId, T value = default) where T : unmanaged
+		public void Set<T>(EcsId entityId, T value = default) where T : unmanaged
 		{
 			EcsTypeInfo typeInfo = EnsureTypeRegistered<T>();
 
